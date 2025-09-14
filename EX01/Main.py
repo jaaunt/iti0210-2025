@@ -28,7 +28,7 @@ def get_neighbors(pos, grid):
     """
     x, y = pos
     neighbors = []
-    for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:  # left, right, up, down
+    for dx, dy in [(0, -1), (0, 1), (-1, 0), (1, 0)]:  # up, down, left, right
         nx, ny = x + dx, y + dy  # calculate new coordinates
         # check if coordinates are inside the grid boundaries
         if 0 <= ny < len(grid) and 0 <= nx < len(grid[0]):
