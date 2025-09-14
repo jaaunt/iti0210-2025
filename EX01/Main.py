@@ -23,18 +23,15 @@ def parse_map(map_lines):
 
 
 def get_neighbors(pos, grid):
-    """
-    Returns all valid neighboring positions (up, down, left, right) that are not lava '*'.
-    """
     x, y = pos
     neighbors = []
-    for dx, dy in [(0, -1), (-1, 0), (1, 0), (0, 1)]:  # up, left, right, down
-        nx, ny = x + dx, y + dy  # calculate new coordinates
-        # check if coordinates are inside the grid boundaries
+    for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:  # left, right, up, down
+        nx, ny = x + dx, y + dy
         if 0 <= ny < len(grid) and 0 <= nx < len(grid[0]):
-            if grid[ny][nx] != '*':  # only cells that arent lava
-                neighbors.append((nx, ny))  # add the valid neighbor
+            if grid[ny][nx] != '*':
+                neighbors.append((nx, ny))
     return neighbors
+
 
 
 def reconstruct_path(grid, parent, start, goal):
