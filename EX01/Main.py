@@ -28,7 +28,7 @@ def get_neighbors(pos, grid):
     """
     x, y = pos
     neighbors = []
-    for dx, dy in [(0, -1), (0, 1), (-1, 0), (1, 0)]:  # up, down, left, right
+    for dx, dy in [(0, -1), (-1, 0), (1, 0), (0, 1)]:  # up, left, right, down
         nx, ny = x + dx, y + dy  # calculate new coordinates
         # check if coordinates are inside the grid boundaries
         if 0 <= ny < len(grid) and 0 <= nx < len(grid[0]):
@@ -115,7 +115,8 @@ def astar_search(grid, start, goal):
                 g_score[neighbor] = tentative_g  # update cost
                 f_score = tentative_g + manhattan_distance(neighbor, goal)  # f = g + h
                 parent[neighbor] = current  # track parent
-                heapq.heappush(heap, (f_score, tentative_g, neighbor))  # add neighbor to heap
+                h_score = manhattan_distance(neighbor, goal)  # distance from neighbor to goal
+                heapq.heappush(heap, (f_score, h_score, neighbor))  # tie-break with h_score
 
 
 def solve_pathfinding(map_data):
