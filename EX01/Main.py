@@ -98,26 +98,30 @@ def astar_search(grid, start, goal):
     """
     A* Search.
     """
-    heap = [(manhattan_distance(start, goal), 0,
-             start)]  # (priority to explore first(f-score=g+h), manhattan distance(h), steps taken so far(g), coordinates of the cell)
-    parent = {start: None}  # track parent nodes
+    heap = [(manhattan_distance(start, goal), 0, start)]  # (f-score = g+h, h-score = heuristic, node coordinates)
+    parent = {start: None}  # track parent nodes for path reconstruction
     g_score = {start: 0}  # cost from start to node
+    visited = set()  # track nodes already processed to avoid revisiting
 
     while heap:  # while there are nodes to explore
-        f, g, current = heapq.heappop(heap)  # pop node with lowest f_score
-        if current == goal:  # goal reached
-            reconstruct_path(grid, parent, start, goal)  # mark path
-            return
-        for neighbor in get_neighbors(current, grid):  # explore neighbors
-            tentative_g = g + 1  # cost to reach neighbor
-            # if neighbor not visited or found better path
-            if neighbor not in g_score or tentative_g < g_score[neighbor]:
-                g_score[neighbor] = tentative_g  # update cost
-                f_score = tentative_g + manhattan_distance(neighbor, goal)  # f = g + h
-                parent[neighbor] = current  # track parent
-                h_score = manhattan_distance(neighbor, goal)  # distance from neighbor to goal
-                heapq.heappush(heap, (f_score, h_score, neighbor))  # tie-break with h_score
+        f, h, current = heapq.heappop(heap)  # pop node with lowest f-score
+        if current in visited:  # skip if already processed
+            continue
+        visited.add(current)  # mark current node as visited
 
+        if current == goal:  # goal reached
+            reconstruct_path(grid, parent, start, goal)  # mark path on grid
+            return
+
+        for neighbor in get_neighbors(current, grid):  # explore valid neighbors
+            tentative_g = g_score[current] + 1  # cost to reach neighbor from start
+            # if neighbor not visited or we found a cheaper path
+            if neighbor not in g_score or tentative_g < g_score[neighbor]:
+                g_score[neighbor] = tentative_g  # update cost to reach neighbor
+                f_score = tentative_g + manhattan_distance(neighbor, goal)  # total estimated cost f = g + h
+                parent[neighbor] = current  # track parent for path reconstruction
+                h_score = manhattan_distance(neighbor, goal)  # heuristic for tie-breaking
+                heapq.heappush(heap, (f_score, h_score, neighbor))  # add neighbor to heap
 
 def solve_pathfinding(map_data):
     """
