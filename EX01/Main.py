@@ -1,155 +1,164 @@
-from Generator import generate_map
-import sys
-
 from collections import deque
 import heapq
-
+import sys
+from random import randint
 
 # helper functions
 
 def parse_map(map_lines):
-    """
-    Converts input to a list and finds start 's' and goal 'D' positions.
-    """
-    grid = [list(line) for line in map_lines]  # convert each row into a list of characters
+    """Convert input to a grid and find start 's' and goal 'D' coordinates."""
+    grid = [list(line) for line in map_lines]  # convert each row into a list
     start = goal = None
-    for y, row in enumerate(grid):  # loop through rows with index y
-        for x, ch in enumerate(row):  # loop through columns with index x
-            if ch == 's':  # start
+    for y, row in enumerate(grid):
+        for x, ch in enumerate(row):
+            if ch == 's':
                 start = (x, y)
-            elif ch == 'D':  # goal
+            elif ch == 'D':
                 goal = (x, y)
-    return grid, start, goal  # return grid and coordinates of start and goal
-
+    return grid, start, goal
 
 def get_neighbors(pos, grid):
+    """Return valid neighboring positions (up, left, right, down) that are not lava '*'."""
     x, y = pos
     neighbors = []
-    for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:  # left, right, up, down
+    for dx, dy in [(0, -1), (-1, 0), (1, 0), (0, 1)]:  # up, left, right, down
         nx, ny = x + dx, y + dy
-        if 0 <= ny < len(grid) and 0 <= nx < len(grid[0]):
-            if grid[ny][nx] != '*':
-                neighbors.append((nx, ny))
+        if 0 <= ny < len(grid) and 0 <= nx < len(grid[0]) and grid[ny][nx] != '*':
+            neighbors.append((nx, ny))
     return neighbors
 
-
-
 def reconstruct_path(grid, parent, start, goal):
-    """
-    Backtracks from goal to start using the parent dictionary and marks path with '.'.
-    """
+    """Backtrack from goal to start and mark path with '.'."""
     current = goal
-    while current != start:  # until we reach the start
+    while current != start:
         x, y = current
-        if grid[y][x] not in ('s', 'D'):  # dont overwrite start or goal
-            grid[y][x] = '.'  # mark the path
-        current = parent[current]  # move to previous node along the path
-
+        if grid[y][x] not in ('s', 'D'):
+            grid[y][x] = '.'
+        current = parent[current]
 
 def manhattan_distance(a, b):
-    """
-    Computes Manhattan distance between two positions (x1,y1) and (x2,y2).
-    """
-    return abs(a[0] - b[0]) + abs(a[1] - b[1])
+    return abs(a[0]-b[0]) + abs(a[1]-b[1])
 
+# BFS
 
 def bfs_search(grid, start, goal):
-    """
-    BFS Search.
-    """
-    queue = deque([start])  # queue for BFS, start with the starting node
-    parent = {start: None}  # track parent of each node to reconstruct path
+    queue = deque([start])
+    parent = {start: None}
+    while queue:
+        current = queue.popleft()
+        if current == goal:
+            reconstruct_path(grid, parent, start, goal)
+            return
+        for neighbor in get_neighbors(current, grid):
+            if neighbor not in parent:
+                parent[neighbor] = current
+                queue.append(neighbor)
 
-    while queue:  # while there are nodes to explore
-        current = queue.popleft()  # get the next node from the front of the queue
-        if current == goal:  # if we've reached the goal
-            reconstruct_path(grid, parent, start, goal)  # mark path on grid
-            return  # finished
-        for neighbor in get_neighbors(current, grid):  # explore neighbors
-            if neighbor not in parent:  # only visit unvisited neighbors
-                parent[neighbor] = current  # track how we got here
-                queue.append(neighbor)  # add neighbor to the queue
-
+# Greedy Best-First
 
 def greedy_best_first_search(grid, start, goal):
-    """
-    Greedy Best First Search.
-    """
-    heap = [(manhattan_distance(start, goal), start)]  # priority queue by: heuristic(manhattan), node
-    parent = {start: None}  # track parent nodes
-    visited = set([start])  # track visited nodes to avoid revisiting
-
-    while heap:  # while there are nodes in the priority queue
-        _, current = heapq.heappop(heap)  # pop node with lowest heuristic
-        if current == goal:  # goal reached
-            reconstruct_path(grid, parent, start, goal)  # mark path
+    heap = [(manhattan_distance(start, goal), start)]
+    parent = {start: None}
+    visited = {start}
+    while heap:
+        _, current = heapq.heappop(heap)
+        if current == goal:
+            reconstruct_path(grid, parent, start, goal)
             return
-        for neighbor in get_neighbors(current, grid):  # check neighbors
-            if neighbor not in visited:  # only unvisited neighbors
-                visited.add(neighbor)  # mark as visited
-                parent[neighbor] = current  # track parent
-                heapq.heappush(heap, (manhattan_distance(neighbor, goal), neighbor))  # add neighbor to heap
+        for neighbor in get_neighbors(current, grid):
+            if neighbor not in visited:
+                visited.add(neighbor)
+                parent[neighbor] = current
+                heapq.heappush(heap, (manhattan_distance(neighbor, goal), neighbor))
 
+# A*
 
 def astar_search(grid, start, goal):
-    """
-    A* Search.
-    """
-    heap = [(manhattan_distance(start, goal), 0, start)]  # (f-score = g+h, h-score = heuristic, node coordinates)
-    parent = {start: None}  # track parent nodes for path reconstruction
-    g_score = {start: 0}  # cost from start to node
-    visited = set()  # track nodes already processed to avoid revisiting
-
-    while heap:  # while there are nodes to explore
-        f, h, current = heapq.heappop(heap)  # pop node with lowest f-score
-        if current in visited:  # skip if already processed
+    heap = [(manhattan_distance(start, goal), 0, start)]  # f, g, current
+    parent = {start: None}
+    g_score = {start: 0}
+    visited = set()
+    while heap:
+        f, g, current = heapq.heappop(heap)
+        if current in visited:
             continue
-        visited.add(current)  # mark current node as visited
-
-        if current == goal:  # goal reached
-            reconstruct_path(grid, parent, start, goal)  # mark path on grid
+        visited.add(current)
+        if current == goal:
+            reconstruct_path(grid, parent, start, goal)
             return
-
-        for neighbor in get_neighbors(current, grid):  # explore valid neighbors
-            tentative_g = g_score[current] + 1  # cost to reach neighbor from start
-            # if neighbor not visited or we found a cheaper path
+        for neighbor in get_neighbors(current, grid):
+            tentative_g = g_score[current] + 1
             if neighbor not in g_score or tentative_g < g_score[neighbor]:
-                g_score[neighbor] = tentative_g  # update cost to reach neighbor
-                f_score = tentative_g + manhattan_distance(neighbor, goal)  # total estimated cost f = g + h
-                parent[neighbor] = current  # track parent for path reconstruction
-                h_score = manhattan_distance(neighbor, goal)  # heuristic for tie-breaking
-                heapq.heappush(heap, (f_score, h_score, neighbor))  # add neighbor to heap
+                g_score[neighbor] = tentative_g
+                f_score = tentative_g + manhattan_distance(neighbor, goal)
+                parent[neighbor] = current
+                heapq.heappush(heap, (f_score, tentative_g, neighbor))
+
+# solve pathfinding
 
 def solve_pathfinding(map_data):
-    """
-    Which algorithm to run.
-    """
-    grid, start, goal = parse_map(map_data)  # convert input lines to grid and find start/goal
+    grid, start, goal = parse_map(map_data)
+    astar_search(grid, start, goal)
+    for row in grid:
+        print("".join(row))
 
-    # bfs_search(grid, start, goal)  # BFS
-    # greedy_best_first_search(grid, start, goal)  # Greedy Best-First
-    astar_search(grid, start, goal)  # A*
+# N-Queens
 
-    for row in grid:  # print the final grid
-        print("".join(row))  # join each row back into a string and print
+def clash_pairs(cols):
+    """Count pairs of queens in conflict."""
+    N = len(cols)
+    total = 0
+    for i in range(N):
+        for j in range(i+1, N):
+            if cols[i] == cols[j] or abs(cols[i]-cols[j]) == j-i:
+                total += 1
+    return total
 
+def steepest_ascent_nqueens(N, restarts_limit=1000):
+    """Solve N-Queens using steepest ascent + random restarts."""
+    for _ in range(restarts_limit):
+        cols = [randint(0, N-1) for _ in range(N)]
+        while True:
+            cur_cost = clash_pairs(cols)
+            if cur_cost == 0:
+                return cols
+            moved = False
+            for c in range(N):
+                best_row = cols[c]
+                best_cost = cur_cost
+                orig_row = cols[c]
+                for r in range(N):
+                    if r == orig_row:
+                        continue
+                    cols[c] = r
+                    cost = clash_pairs(cols)
+                    if cost < best_cost:
+                        best_cost = cost
+                        best_row = r
+                        moved = True
+                cols[c] = best_row
+            if not moved:
+                break
+    raise ValueError("Failed to find solution after random restarts")
 
-def solve_nqueens(n):
-    pass
+def emit_nqueens_solution(N):
+    cols = steepest_ascent_nqueens(N)
+    for r in range(N):
+        row = ['.']*N
+        for c in range(N):
+            if cols[c] == r:
+                row[c] = 'Q'
+        print("".join(row))
 
 
 if __name__ == "__main__":
-
-    # gen test file
-    generated = generate_map(10, 10, 0.2)
-    lines = generated.splitlines()
-    first_line = lines[0]
-    rest_lines = lines[1:]
-
-    value = int(first_line)
+    first_line = sys.stdin.readline()
+    if not first_line:
+        sys.exit(0)
+    value = int(first_line.strip())
     if value < 0:
-        n = -value
-        solve_nqueens(n)
+        emit_nqueens_solution(-value)
     else:
-        map_data = rest_lines
-        solve_pathfinding(map_data)
+        H = value
+        map_rows = [sys.stdin.readline().rstrip("\n") for _ in range(H)]
+        solve_pathfinding(map_rows)
