@@ -74,6 +74,20 @@ def random_rollout(board, player):
         current = "O" if current == "X" else "X"  # change to other players turn
 
 def solve_monte_carlo(board_state, player_to_move):
+    """
+    Decide and execute the best move for the current player using pure Monte Carlo simulation.
+
+    Steps:
+    1. Get all legal moves.
+    2. For each legal move:
+        - Simulate the move on a copy of the board.
+        - Play out the rest of the game with random moves (rollouts) until the game ends.
+        - Record whether the initial move led to a win, loss, or draw for the current player.
+    3. Estimate the win rate of each move as:
+           win_rate = (wins + 0.5 * draws) / simulations
+    4. Select the move with the highest win rate.
+    5. Apply the chosen move to the real board and print the updated state.
+    """
     legal_moves = get_legal_moves(board_state)  # all legal moves
     move_wins = {m: 0 for m in legal_moves}  # how many times it leads to a win or draw
     move_sims = {m: 0 for m in legal_moves}  # how many simulations for that move
