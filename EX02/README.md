@@ -62,4 +62,4 @@ The algorithm chose **column 2** as the best move because it had the highest win
 
 ## Defence Video
 
-(link here after i record it hopefully with theory)
+Link: https://youtu.be/4ZyqnIgeNXI
