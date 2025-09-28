@@ -5,7 +5,7 @@ import sys  # to read input
 ROWS = 6
 COLS = 7  # board measurements
 WIN_LENGTH = 4  # how many in a row to win
-SIMULATIONS_PER_MOVE = 360  # bigger num more accurate smaller num  faster
+SIMULATIONS_PER_MOVE = 360  # bigger num more accurate smaller num faster
 # random rollout amount per move
 
 def get_legal_moves(board):
