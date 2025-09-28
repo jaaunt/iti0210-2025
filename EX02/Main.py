@@ -5,7 +5,7 @@ import sys  # to read input
 ROWS = 6
 COLS = 7  # board measurements
 WIN_LENGTH = 4  # how many in a row to win
-SIMULATIONS_PER_MOVE = 350  # bigger num more accurate smaller num faster
+SIMULATIONS_PER_MOVE = 360  # bigger num more accurate smaller num faster
 # random rollout amount per move
 
 def get_legal_moves(board):
@@ -78,7 +78,7 @@ def solve_monte_carlo(board_state, player_to_move):
     move_wins = {m: 0 for m in legal_moves}  # how many times it leads to a win or draw
     move_sims = {m: 0 for m in legal_moves}  # how many simulations for that move
 
-    for move in legal_moves:  # for every move try it up to 350 times
+    for move in legal_moves:  # for every move try it up to the sim max amount
         for _ in range(SIMULATIONS_PER_MOVE):
             sim_board = copy.deepcopy(board_state)  # make a copy of the game so you dont fuck up the real one
             make_move(sim_board, move, player_to_move)  # make the move
