@@ -5,7 +5,7 @@ import sys
 ROWS = 6
 COLS = 7
 WIN_LENGTH = 4
-SIMULATIONS_PER_MOVE = 500  # bigger num more accurate smaller num faster
+SIMULATIONS_PER_MOVE = 400  # bigger num more accurate smaller num faster
 
 def get_legal_moves(board):
     """Find all non-full columns."""
