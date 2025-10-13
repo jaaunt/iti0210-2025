@@ -46,10 +46,6 @@ def forward_chaining(clauses, query):
     while agenda:
         fact = agenda.pop(0)  # take one known fact from the agenda (the first and remmove it)
 
-        # if its a proven query stop
-        if fact == query:
-            return "YES"
-
         # split the implication into parts to check separately
         for premises, conclusion in implications:
             if fact in premises:  # if its in the premise
