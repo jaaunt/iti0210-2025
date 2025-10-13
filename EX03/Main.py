@@ -5,18 +5,20 @@ def parse_clause(clause_str):
         "A & B -> C"   →  (["A", "B"], "C")
         "A"            →  ([], "A")   (fact)
     """
-    clause_str = clause_str.strip()
+    # make input easier to use, lists over strings any day
+    clause_str = clause_str.strip()  # remove unneeded spaces
 
-    if "->" in clause_str:
-        premises_str, conclusion = clause_str.split("->")
+    if "->" in clause_str:  # conclusion has premise(eeldus) and conclusion(jareldus) and -> inbetween
+        premises_str, conclusion = clause_str.split("->")  # split the parts
         premises = [p.strip() for p in premises_str.split("&")]
-        conclusion = conclusion.strip()
+        # split the premise into parts and remove unneeded spaces from both
+        conclusion = conclusion.strip()  # remove spaces from the conclusion part
     else:
-        # If no '->', this is a fact (no premises)
-        premises = []
-        conclusion = clause_str
+        # if it doesnt have a -> its a fact
+        premises = []  # doesnt have a premise, empty list
+        conclusion = clause_str  # whole line is the conclusion
 
-    return (premises, conclusion)
+    return (premises, conclusion)  # return both parts
 
 
 def forward_chaining(clauses, query):
@@ -24,43 +26,43 @@ def forward_chaining(clauses, query):
     Forward chaining algorithm for propositional logic inference.
     Determines if 'query' can be derived from the given knowledge base.
     """
-    inferred = set()
-    agenda = []
-    rules = []
-    count = {}
+    proven_facts = set()  # all proven facts (no dublicates)
+    agenda = []  # whats on the agenda aka what hasnt been cheked yet :D, pretty much like a que of unchecked statements
+    implications = []  # same shit as before, just conclusions said diffrently...
+    count = {}  # how many implications unfulfilled
 
-    # Step 1: Separate facts and rules
+    # first seperate premises and conclusions in clauses
     for premises, conclusion in clauses:
         if not premises:
-            # A fact add directly to inferred and agenda
-            inferred.add(conclusion)
+            # if there is no premise its a fact add to facts and to the agenda
+            proven_facts.add(conclusion)
             agenda.append(conclusion)
         else:
-            # A rule store it and initialize its counter
-            rules.append((premises, conclusion))
-            count[(tuple(premises), conclusion)] = len(premises)
+            # its an implication(jareldus)
+            implications.append((premises, conclusion))
+            count[(tuple(premises), conclusion)] = len(premises)  # add into a dictionary, key example ("A", "B"), "C"
+            # where a and b are premises and c is the conclusion and the keys value is the amount of premises that need to be checked
 
-    # Step 2: Forward chaining loop
     while agenda:
-        fact = agenda.pop(0)  # take one known fact
+        fact = agenda.pop(0)  # take one known fact from the agenda (the first and remmove it)
 
-        # If weve proven the query, we can stop
+        # if its a proven query stop
         if fact == query:
             return "YES"
 
-        # For every rule that uses this fact as a premise
-        for premises, conclusion in rules:
-            if fact in premises:
-                count[(tuple(premises), conclusion)] -= 1  # one less unknown premise
+        # split the implication into parts to check separately
+        for premises, conclusion in implications:
+            if fact in premises:  # if its in the premise
+                count[(tuple(premises), conclusion)] -= 1  # remove one from unknown premises
 
-                # If all premises are now satisfied
+                # if all preises are solved
                 if count[(tuple(premises), conclusion)] == 0:
-                    if conclusion not in inferred:
-                        inferred.add(conclusion)
-                        agenda.append(conclusion)  # new fact discovered
+                    if conclusion not in proven_facts:  # since premises were true the conclusion must be true add it to facts
+                        proven_facts.add(conclusion)
+                        agenda.append(conclusion)
 
-    # Step 3: If we finish and never derived the query
-    return "YES" if query in inferred else "NO"
+    # check again if the query is in proven facts return yes otherwise no
+    return "YES" if query in proven_facts else "NO"
 
 
 if __name__ == "__main__":
