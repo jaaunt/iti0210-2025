@@ -1,3 +1,5 @@
+from collections import deque
+
 def parse_clause(clause_str):
     """
     Parses a clause string into premises and conclusion.
@@ -27,7 +29,8 @@ def forward_chaining(clauses, query):
     Determines if 'query' can be derived from the given knowledge base.
     """
     proven_facts = set()  # all proven facts (no dublicates)
-    agenda = []  # whats on the agenda aka what hasnt been cheked yet :D, pretty much like a que of unchecked statements
+    agenda = deque()  # whats on the agenda aka what hasnt been cheked yet :D, pretty much like a que of unchecked facts
+    # deque was code reviews reccommendation
     implications = []  # same shit as before, just conclusions said diffrently...
     count = {}  # how many implications unfulfilled
 
@@ -43,8 +46,9 @@ def forward_chaining(clauses, query):
             count[(tuple(premises), conclusion)] = len(premises)  # add into a dictionary, key example ("A", "B"), "C"
             # where a and b are premises and c is the conclusion and the keys value is the amount of premises that need to be checked
 
+    #the forward chaining loop
     while agenda:
-        fact = agenda.pop(0)  # take one known fact from the agenda (the first and remmove it)
+        fact = agenda.popleft()  # take one known fact from the agenda (the first and remmove it)
 
         # split the implication into parts to check separately
         for premises, conclusion in implications:
