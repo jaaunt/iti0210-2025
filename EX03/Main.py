@@ -32,11 +32,11 @@ def forward_chaining(clauses, query):
     # Step 1: Separate facts and rules
     for premises, conclusion in clauses:
         if not premises:
-            # A fact → add directly to inferred and agenda
+            # A fact add directly to inferred and agenda
             inferred.add(conclusion)
             agenda.append(conclusion)
         else:
-            # A rule → store it and initialize its counter
+            # A rule store it and initialize its counter
             rules.append((premises, conclusion))
             count[(tuple(premises), conclusion)] = len(premises)
 
@@ -44,7 +44,7 @@ def forward_chaining(clauses, query):
     while agenda:
         fact = agenda.pop(0)  # take one known fact
 
-        # If we've proven the query, we can stop
+        # If weve proven the query, we can stop
         if fact == query:
             return "YES"
 
