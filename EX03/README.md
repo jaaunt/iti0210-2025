@@ -108,5 +108,5 @@ We want to determine whether `"Egg makes a mess"` can be derived using the **for
 
 ## 6. Defence Video
 
-Link: 
+Link:  
 

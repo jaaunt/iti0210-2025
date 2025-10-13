@@ -55,7 +55,7 @@ def forward_chaining(clauses, query):
             if fact in premises:  # if its in the premise
                 count[(tuple(premises), conclusion)] -= 1  # remove one from unknown premises
 
-                # if all preises are solved
+                # if all premises are solved
                 if count[(tuple(premises), conclusion)] == 0:
                     if conclusion not in proven_facts:  # since premises were true the conclusion must be true add it to facts
                         proven_facts.add(conclusion)
